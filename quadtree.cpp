@@ -117,11 +117,11 @@ CoordedNode GetCoordsFromPath(const std::vector<size_t>& path) {
 		std::pair<int, int>(1, 1),
 		std::pair<int, int>(-1, 1)
 	};
-	CoordedNode node{Geometry::Vector(0.5, 0.5), 1};
+	CoordedNode node{Geometry::Vector(0.5, 0.5), 0.5};
 	for (size_t div : path) {
 		node.Size /= 2;
-		node.Pos.x += Alignment[div].first * node.Size / 2;
-		node.Pos.y += Alignment[div].second * node.Size / 2;
+		node.Pos.x += Alignment[div].first * node.Size;
+		node.Pos.y += Alignment[div].second * node.Size;
 	}
 	return node;
 }

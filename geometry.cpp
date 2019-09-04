@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <cmath>
 
+#include <iostream>
+
 namespace Geometry {
 
 Vector::Vector() {
@@ -105,6 +107,10 @@ bool SegmentIntersection(const Vector& a, const Vector& b, const Vector& c, cons
 		SignCrossProduct(c, d, c, a) * SignCrossProduct(c, d, c, b) <= 0;
 }
 
+bool PointInAABB(const Vector& a, const Vector& b, const Vector& point) {
+	return point.x >= a.x && point.x <= b.x && point.y >= a.y && point.y <= b.y;
+}
+
 
 bool Polygon::IsConvex() const {
 	for (size_t i = 0; i < Vertexes.size(); i++) {
@@ -118,21 +124,18 @@ bool Polygon::IsConvex() const {
 	return true;
 }
 
-bool Polygon::PointIn(const Vector& point) const {
+bool Polygon::IntersectPoint(const Vector& point) const {
 	for (size_t i = 0; i < Vertexes.size(); i++) {
 		int j = (i + 1) % Vertexes.size();
 		int cursgn = SignCrossProduct(Vertexes[i], Vertexes[j], Vertexes[i], point);
 		if (cursgn < 0) {
-			return true;
+			return false;
 		}
 	}
-	return false;
+	return true;
 }
 
-bool Polygon::SegmentIn(const Vector& a, const Vector& b) const {
-	if (PointIn(a) || PointIn(b)) {
-		return true;
-	}
+bool Polygon::IntersectSegment(const Vector& a, const Vector& b) const {
 	for (size_t i = 0; i < Vertexes.size(); i++) {
 		int j = (i + 1) % Vertexes.size();
 		if (SegmentIntersection(Vertexes[i], Vertexes[j], a, b)) {
@@ -142,19 +145,44 @@ bool Polygon::SegmentIn(const Vector& a, const Vector& b) const {
 	return false;
 }
 
+bool Polygon::IntersectAABB(const Vector& a, const Vector& b) const {
+	if (Vertexes.empty()) {
+		return false;
+	}
 
-bool Scene::PointIn(const Vector& point) const {
-	for (auto i : Objects) {
-		if (i.PointIn(point)) {
+	Vector tx = Vector(b.x - a.x, 0);
+	Vector ty = Vector(0, b.y - a.y);
+	return PointInAABB(a, b, Vertexes[0])
+	 || IntersectSegment(a, a + tx)
+	 || IntersectSegment(a, a + ty)
+	 || IntersectSegment(b - tx, b)
+	 || IntersectSegment(b - ty, b);
+	
+	return false;
+}
+
+
+bool Scene::IntersectPoint(const Vector& point) const {
+	for (const auto& i : Objects) {
+		if (i.IntersectPoint(point)) {
 			return true;
 		}
 	}
 	return false;
 }
 
-bool Scene::SegmentIn(const Vector& a, const Vector& b) const {
-	for (auto i : Objects) {
-		if (i.SegmentIn(a, b)) {
+bool Scene::IntersectSegment(const Vector& a, const Vector& b) const {
+	for (const auto& i : Objects) {
+		if (i.IntersectSegment(a, b)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool Scene::IntersectAABB(const Vector& a, const Vector& b) const {
+	for (const auto& i : Objects) {
+		if (i.IntersectAABB(a, b)) {
 			return true;
 		}
 	}

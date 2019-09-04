@@ -38,6 +38,8 @@ double ScalarProduct(const Vector& a, const Vector& b, const Vector& c, const Ve
 double CrossProduct(const Vector& a, const Vector& b, const Vector& c, const Vector& d);
 int SignCrossProduct(const Vector& a, const Vector& b, const Vector& c, const Vector& d);
 bool SegmentIntersection(const Vector& a, const Vector& b, const Vector& c, const Vector& d);
+// a - min coords point, b - max coords point
+bool PointInAABB(const Vector& a, const Vector& b, const Vector& point);
 
 // Convex
 class Polygon {
@@ -46,18 +48,22 @@ public:
 
 	bool IsConvex() const;
 
-	bool PointIn(const Vector& point) const;
+	bool IntersectPoint(const Vector& point) const;
 
-	bool SegmentIn(const Vector& a, const Vector& b) const;
+	bool IntersectSegment(const Vector& a, const Vector& b) const;
+
+	bool IntersectAABB(const Vector& a, const Vector& b) const;
 };
 
 class Scene {
 public:
 	std::vector<Polygon> Objects;
 
-	bool PointIn(const Vector& point) const;
+	bool IntersectPoint(const Vector& point) const;
 
-	bool SegmentIn(const Vector& a, const Vector& b) const;
+	bool IntersectAABB(const Vector& a, const Vector& b) const;
+
+	bool IntersectSegment(const Vector& a, const Vector& b) const;
 };
 
 } // END namespace Geometry
